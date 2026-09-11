@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Salto y gravedad")]
     [SerializeField] private float _jumpForce = 5f;
     [SerializeField] private float _gravity = -9.8f;
+    [SerializeField] private float _originalGravity;
 
     [Header("Carama (modo hijo")]
 
@@ -26,7 +27,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Objeto a instanciar")]
     [SerializeField] GameObject GameObjectPrefab;
 
-    private CharacterController _controller;
+    [SerializeField] private bool _liane = false;
+    public CharacterController _controller;
     private float _speed;
     private Vector2 _move;
     private float _rotate;
@@ -43,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         _speed = _normalSpeed;
+        _originalGravity = _gravity;
     }
 
     // Update is called once per frame
@@ -79,7 +82,23 @@ public class PlayerMovement : MonoBehaviour
     
     public void OnMovement(InputAction.CallbackContext context)
     {
-        _move = context.ReadValue<Vector2>();
+        if (_liane == false)
+        {
+            _move = context.ReadValue<Vector2>();
+        }
+        else
+        {
+            Vector3 movement = Vector3.zero;
+            if (Keyboard.current.wKey.isPressed)
+            {
+                movement = Vector3.up;
+            }
+            if (Keyboard.current.wKey.isPressed)
+            {
+                movement = Vector3.up;
+            }
+             _controller.Move(movement * _speed * Time.deltaTime);
+        }
     }
     public void OnLook(InputAction.CallbackContext context)
     {
@@ -92,18 +111,33 @@ public class PlayerMovement : MonoBehaviour
     public void OnSprint(InputAction.CallbackContext context)
     {
         if (context.performed)
-            _speed = _sprintSpeed;
+            if(_controller.isGrounded == true)
+            {
+                _speed = _sprintSpeed;
+            }
         if (context.canceled)
-            _speed = _normalSpeed;
+            if (_controller.isGrounded == true)
+            {
+                _speed = _normalSpeed;
+            }
+                
     }
     public void OnJump(InputAction.CallbackContext context)
     {
-        if(context.performed && _controller.isGrounded)
+        if(context.performed && _controller.isGrounded || context.performed && _liane == true)
         {
             _verticalVelocity = Mathf.Sqrt(_jumpForce * -2f * _gravity);
         }
     }
-    
-
+    public void OnLiane()
+    {
+        _gravity = 0;
+        _liane = true;
+    }
+    public void OffLiane()
+    {
+        _gravity = _originalGravity;
+        _liane = false;
+    }
 }
 
