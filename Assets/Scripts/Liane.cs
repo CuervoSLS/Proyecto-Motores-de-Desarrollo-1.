@@ -1,3 +1,4 @@
+using StarterAssets;
 using UnityEngine;
 
 public class Liane : MonoBehaviour
@@ -19,7 +20,7 @@ public class Liane : MonoBehaviour
         if(other.CompareTag("Player"))
         {
             print("hola");
-            PlayerMovement controller = other.gameObject.GetComponent<PlayerMovement>();
+            ThirdPersonController controller = other.gameObject.GetComponent<ThirdPersonController>();
             controller.Invoke("OnLiane", 0);
         }
     }
@@ -28,7 +29,7 @@ public class Liane : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         {
             print("chau");
-            PlayerMovement controller = other.gameObject.GetComponent<PlayerMovement>();
+            ThirdPersonController controller = other.gameObject.GetComponent<ThirdPersonController>();
             controller.Invoke("OffLiane", 0);
         }
     }

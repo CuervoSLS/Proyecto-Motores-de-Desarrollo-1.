@@ -21,6 +21,9 @@ namespace StarterAssets
         [Tooltip("Sprint speed of the character in m/s")]
         public float SprintSpeed = 5.335f;
 
+        [Tooltip("")]
+        private float _lianeSpeed = 2f;
+
         [Tooltip("How fast the character turns to face movement direction")]
         [Range(0.0f, 0.3f)]
         public float RotationSmoothTime = 0.12f;
@@ -37,7 +40,7 @@ namespace StarterAssets
         public float JumpHeight = 1.2f;
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-        public float Gravity = -15.0f;
+        public float Gravity = -9.8f;
 
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
@@ -80,6 +83,7 @@ namespace StarterAssets
         private float _cinemachineTargetPitch;
 
         // player
+        private Vector2 _move;
         private float _speed;
         private float _animationBlend;
         private float _targetRotation = 0.0f;
@@ -109,8 +113,14 @@ namespace StarterAssets
         private const float _threshold = 0.01f;
 
         private bool _hasAnimator;
+        private bool _liane = false;
+
+        private bool _liane2 = false;
+
+        private bool _lianeJump = false;
 
         private bool IsCurrentDeviceMouse
+
         {
             get
             {
@@ -213,7 +223,30 @@ namespace StarterAssets
 
         private void Move()
         {
-            // set target speed based on move speed, sprint speed and if sprint is pressed
+            if (_liane == true) //comprueba si esta en liana
+            {
+                if (Keyboard.current.shiftKey.isPressed == false) //comprueba el shift ya que cambia el comportamiento
+                {
+                    _speed = _lianeSpeed;
+                    Vector3 movement = transform.right * _move.x;
+
+                    if (Keyboard.current.wKey.isPressed)
+                    {
+                        movement = Vector3.up;
+                    }
+                    else if (Keyboard.current.sKey.isPressed)
+                    {
+                        movement = Vector3.down;
+                    }
+
+                    movement = movement.normalized * _speed;
+
+                    _controller.Move(movement * Time.deltaTime);
+
+
+                    return;
+                }
+            }  // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
@@ -279,9 +312,9 @@ namespace StarterAssets
             }
         }
 
-        private void JumpAndGravity()
+        private void JumpAndGravity() 
         {
-            if (Grounded)
+            if (Grounded || _liane == true)
             {
                 // reset the fall timeout timer
                 _fallTimeoutDelta = FallTimeout;
@@ -300,15 +333,26 @@ namespace StarterAssets
                 }
 
                 // Jump
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (Grounded || _lianeJump == true)
                 {
-                    // the square root of H * -2 * G = how much velocity needed to reach desired height
-                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-
-                    // update animator if using character
-                    if (_hasAnimator)
+                    if (_input.jump && _jumpTimeoutDelta <= 0.0f)
                     {
-                        _animator.SetBool(_animIDJump, true);
+                        print("seeeee");
+                        if (_lianeJump == true)
+                        {
+                            Invoke("ResetJumpLiane", 0.7f);
+                            Invoke("CancelLiane", 0.2f);
+                            _lianeJump = false;
+                        }
+
+                        // the square root of H * -2 * G = how much velocity needed to reach desired height
+                        _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+                        // update animator if using character
+                        if (_hasAnimator)
+                        {
+                            _animator.SetBool(_animIDJump, true);
+                        }
                     }
                 }
 
@@ -387,6 +431,32 @@ namespace StarterAssets
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
+        }
+        public void OnLiane()
+        {
+            _liane2 = true;
+            print("hola de vuelta");
+            _lianeJump = true;
+            _liane = true;
+        }
+        public void OffLiane()
+        {
+            Invoke("CancelLiane", 0.4f);
+            print("chau de vuelta");
+            _lianeJump = false;
+            _liane2 = false;
+        }
+        public void ResetJumpLiane()
+        {
+            if (_liane2 == true)
+            {
+                _lianeJump = true;
+                _liane = true;
+            }
+        }
+        public void CancelLiane()
+        {
+            _liane = false;
         }
     }
 }
