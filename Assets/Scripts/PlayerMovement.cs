@@ -93,7 +93,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 movement = Vector3.up;
             }
-            if (Keyboard.current.wKey.isPressed)
+            if (Keyboard.current.sKey.isPressed)
             {
                 movement = Vector3.up;
             }
@@ -111,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
     public void OnSprint(InputAction.CallbackContext context)
     {
         if (context.performed)
-            if(_controller.isGrounded == true)
+            if(_controller.isGrounded == true || _liane == true)
             {
                 _speed = _sprintSpeed;
             }
@@ -131,11 +131,13 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnLiane()
     {
+        print("hola de vuelta");
         _gravity = 0;
         _liane = true;
     }
     public void OffLiane()
     {
+        print("chau de vuelta");
         _gravity = _originalGravity;
         _liane = false;
     }

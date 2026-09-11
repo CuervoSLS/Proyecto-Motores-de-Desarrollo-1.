@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class Liane : MonoBehaviour
 {
-    private float _originalGravity = 0f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        print("COLISIONO");
     }
 
     // Update is called once per frame
@@ -14,18 +13,21 @@ public class Liane : MonoBehaviour
     {
        //QUE TENGO QUE HACER, HACER QUE CUANDO CHOQUE LIANE TRUE, QUE ISGROUNDED Y ON COLLISION EXT LIANE FALSE
     }
-    void OnCollisionEnter(Collision other)
+    void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.CompareTag("Player"))
+        print("COLISIONO");
+        if(other.CompareTag("Player"))
         {
+            print("hola");
             PlayerMovement controller = other.gameObject.GetComponent<PlayerMovement>();
             controller.Invoke("OnLiane", 0);
         }
     }
-    void OnCollisionExit(Collision other)
+    void OnTriggerExit(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
+            print("chau");
             PlayerMovement controller = other.gameObject.GetComponent<PlayerMovement>();
             controller.Invoke("OffLiane", 0);
         }
