@@ -12,6 +12,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _normalSpeed = 5f;
     [SerializeField] private float _sprintSpeed = 15f;
 
+    [SerializeField] private float _lianeSpeed = 2.5f;
+
     [Header("Rotacion")]
 
     [SerializeField] private float _rotateSpeed = 100f;
@@ -19,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Salto y gravedad")]
     [SerializeField] private float _jumpForce = 5f;
     [SerializeField] private float _gravity = -9.8f;
-    [SerializeField] private float _originalGravity;
 
     [Header("Carama (modo hijo")]
 
@@ -45,7 +46,6 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         _speed = _normalSpeed;
-        _originalGravity = _gravity;
     }
 
     // Update is called once per frame
@@ -61,7 +61,32 @@ public class PlayerMovement : MonoBehaviour
     }
     private void HandleMovement()
     {
-        Vector3 move = transform.forward * _move.y + transform.right * _move.x;
+        if (_liane == true) //comprueba si esta en liana
+        {
+           if (Keyboard.current.shiftKey.isPressed == false) //comprueba el shift ya que cambia el comportamiento
+            {
+                _speed = _lianeSpeed;
+                Vector3 movement = transform.right * _move.x;
+
+                if (Keyboard.current.wKey.isPressed)
+                {
+                    movement = Vector3.up;
+                }
+                else if (Keyboard.current.sKey.isPressed)
+                {
+                    movement = Vector3.down;
+                }
+
+                movement = movement.normalized * _speed;
+
+                _controller.Move(movement * Time.deltaTime);
+                
+
+                return;
+            }
+           
+        }
+        Vector3 move = transform.forward * _move.y + transform.right * _move.x; //el movimiento normal, no se pone dentro de un else porque no afecta a nada.
 
         move = move.normalized * _speed;
 
@@ -82,23 +107,10 @@ public class PlayerMovement : MonoBehaviour
     
     public void OnMovement(InputAction.CallbackContext context)
     {
-        if (_liane == false)
         {
             _move = context.ReadValue<Vector2>();
         }
-        else
-        {
-            Vector3 movement = Vector3.zero;
-            if (Keyboard.current.wKey.isPressed)
-            {
-                movement = Vector3.up;
-            }
-            if (Keyboard.current.sKey.isPressed)
-            {
-                movement = Vector3.up;
-            }
-             _controller.Move(movement * _speed * Time.deltaTime);
-        }
+         
     }
     public void OnLook(InputAction.CallbackContext context)
     {
@@ -115,7 +127,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 _speed = _sprintSpeed;
             }
-        if (context.canceled)
+        else if (context.canceled)
             if (_controller.isGrounded == true)
             {
                 _speed = _normalSpeed;
@@ -131,14 +143,13 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnLiane()
     {
+       
         print("hola de vuelta");
-        _gravity = 0;
         _liane = true;
     }
     public void OffLiane()
     {
         print("chau de vuelta");
-        _gravity = _originalGravity;
         _liane = false;
     }
 }
